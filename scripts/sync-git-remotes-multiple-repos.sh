@@ -74,7 +74,7 @@ done
 # Request ECR description
 REPO_DESCRIPTION=\
 "The repository contains artifacts and reference material related to an AWS CodeDepoly deployment \
-project and its auxiliary components. These components relate to a dual GitHub & AWS CodeCommit \
+project and its auxiliary components. These components relate to a dual GitHub and AWS CodeCommit \
 repository used to perform the sample AWS Tutorial: 'Use CodeDeploy to deploy an application from \
 GitHub'. This exercise is in preparation for the AWS Certified DevOps Engineer Professional Exam."
 while true
@@ -84,7 +84,7 @@ do
   # -p : prompt on stderr
   # -i : use default buffer val
   read -er -i "$REPO_DESCRIPTION" -p "Enter the description here ....................: " USER_INPUT
-  if [[ "${USER_INPUT:=$REPO_DESCRIPTION}" =~ (^[a-zA-Z0-9(). -]*$) ]]
+  if [[ "${USER_INPUT:=$REPO_DESCRIPTION}" =~ (^[a-zA-Z0-9(). -:\']*$) ]]
   then
     echo "Check Valid Comment ...........................: PASS"
     REPO_DESCRIPTION=$USER_INPUT

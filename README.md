@@ -56,3 +56,9 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 > [create-repository](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ecr/create-repository.html)
 
 > [get-login-password](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ecr/get-login-password.html)
+
+
+
+Useful commands:
+
+aws s3 sync ./cfn-templates s3://demo-cert-devops/codedeploy/demo-cert-devops-codedeploy-sample-github/cfn-templates/

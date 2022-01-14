@@ -1,0 +1,160 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Enter Description Here:
+
+# ------------------------------------------
+
+
+# ==========================================
+Metadata: {}
+# Metadata:
+
+
+# ==========================================
+# Parameters {}
+Parameters:
+
+  # ------------------------------------------
+  # --- The Project Name
+  ProjectName:
+    Description: "Name of this particular project"
+    ConstraintDescription: "Specify name of this project"
+    Type: String
+    Default: "demo-cert-devops-codedeploy-sample-github"
+    MinLength: 3
+    MaxLength: 63
+    AllowedPattern:
+      (?!^(\d{1,3}\.){3}\d{1,3}$)(^[a-z0-9]([a-z0-9-]*(\.[a-z0-9])?)*$(?<!\-))
+
+  # ------------------------------------------
+  # --- SSH Key Pair Name
+  SshAccessKeyName:
+    Description: "An Amazon EC2 regional key pair name"
+    Type: AWS::EC2::KeyPair::KeyName
+
+  # ------------------------------------------
+  # --- IP CIDR for SSH Bastion Host
+  SshAccessCIDR:
+    Description: IP range for SSH access into Public Instance.
+    Type: String
+    MinLength: "9"
+    MaxLength: "18"
+    Default: 0.0.0.0/0
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: Must be a valid IPv4 CIDR.
+
+  # ------------------------------------------
+  # --- Latest Amazon_Linux_2 AMI
+  LatestAmi:
+    Description: "The AMI to use for EC2 instances"
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+
+# ==========================================
+Conditions: {}
+# Conditions:
+
+
+# ==========================================
+Resources:
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #         NESTED STACK DECLARATIONS
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  # ------------------------------------------
+  # --- IAM Definition
+  IAMDef:
+    Type: "AWS::CloudFormation::Stack"
+    # .............................
+    Properties:
+      TemplateURL:
+        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-iam.yaml"
+      Parameters:
+        ProjectName:
+          !Ref ProjectName
+      TimeoutInMinutes: 5
+
+  # ------------------------------------------
+  # --- VPC Definition
+  VPCDef:
+    Type: "AWS::CloudFormation::Stack"
+    # .............................
+    Properties:
+      TemplateURL:
+        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-vpc.yaml"
+      Parameters:
+        ProjectName:
+          !Ref ProjectName
+      TimeoutInMinutes: 5
+
+  # ------------------------------------------
+  # --- Public/Private Security Groups
+  SecurityGrpDefs:
+    Type: "AWS::CloudFormation::Stack"
+    # .............................
+    Properties:
+      TemplateURL:
+        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-vpc-sg.yaml"
+      Parameters:
+        ProjectName:
+          !Ref ProjectName
+        VPCID:
+          !GetAtt VPCDef.Outputs.VPCID
+        SshAccessCIDR:
+          !Ref SshAccessCIDR
+      TimeoutInMinutes: 5
+
+  # ------------------------------------------
+  # --- EC2 Launch Template
+  PublicEC2LaunchTemplateDef:
+    Type: "AWS::CloudFormation::Stack"
+    # .............................
+    Properties:
+      TemplateURL:
+        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-ec2-lt.yaml"
+      Parameters:
+        ProjectName:
+          !Ref ProjectName
+        PublicEC2LaunchTemplateAmiId:
+          !Ref LatestAmi
+        PublicEC2SecurityGrpId:
+          !GetAtt SecurityGrpDefs.Outputs.PublicEC2SecurityGrpId
+        PublicEC2SshAccessKeyName:
+          !Ref SshAccessKeyName
+        PublicEC2InstanceProfile: 
+          !GetAtt IAMDef.Outputs.PublicEC2InstanceProfile
+      TimeoutInMinutes: 5
+
+  # ------------------------------------------
+  # --- Public EC2 Instance
+  PublicEC2InstanceDef:
+    Type: "AWS::CloudFormation::Stack"
+    # .............................
+    Properties:
+      TemplateURL:
+        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-ec2-pub.yaml"
+      Parameters:
+        ProjectName:
+          !Ref ProjectName
+        PublicEC2InstanceAmiId:
+          !Ref LatestAmi
+        PublicEC2SecurityGrpId:
+          !GetAtt SecurityGrpDefs.Outputs.PublicEC2SecurityGrpId
+        PublicEC2SubnetIdA:
+          !GetAtt VPCDef.Outputs.PublicSubnetIdA
+        PublicEC2SubnetIdB:
+          !GetAtt VPCDef.Outputs.PublicSubnetIdB
+        PublicEC2SshAccessKeyName:
+          !Ref SshAccessKeyName
+        PublicEC2InstanceProfile: 
+          !GetAtt IAMDef.Outputs.PublicEC2InstanceProfile
+        PublicEC2LaunchTemplateId:
+          !GetAtt PublicEC2LaunchTemplateDef.Outputs.PublicEC2LaunchTemplateId
+      TimeoutInMinutes: 10
+
+
+# ==========================================
+Outputs: {}
+# Outputs:
