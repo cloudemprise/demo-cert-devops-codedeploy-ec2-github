@@ -88,6 +88,11 @@ Resources:
   PublicEC2Instance:
     Type: "AWS::EC2::Instance"
     # .............................
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: "PT7M"
+    # .............................
     Properties:
       # .............................
       Tags:
@@ -131,8 +136,23 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash -xe
-            echo "UserData Script Instance Execution: ${AWS::Region}"
-
+            # Clean AMI of any previous agent caching information:
+            CODEDEPLOY_BIN="/opt/codedeploy-agent/bin/codedeploy-agent"
+            $CODEDEPLOY_BIN stop
+            yum erase codedeploy-agent -y
+            # ---
+            # Update Packages, inc. aws-cfn-bootstrap:
+            yum update -y
+            yum install ruby -y
+            yum install wget -y
+            # ---
+            cd /home/ec2-user
+            wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
+            chmod +x ./install
+            ./install auto
+            # ---
+            # All done so signal success
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackId} --resource PublicEC2Instance --region ${AWS::Region}
 
 # ==========================================
 # Outputs: {}
