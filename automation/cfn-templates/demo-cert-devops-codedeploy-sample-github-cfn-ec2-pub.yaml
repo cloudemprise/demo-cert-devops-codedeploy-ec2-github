@@ -32,7 +32,6 @@ Parameters:
   PublicEC2InstanceAmiId:
     Description: "Public EC2 Instance AMI ID"
     Type: "AWS::EC2::Image::Id"
-    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 
   # ------------------------------------------
   # --- Public Security Group Resource ID
@@ -136,16 +135,17 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash -xe
-            # Clean AMI of any previous agent caching information:
-            CODEDEPLOY_BIN="/opt/codedeploy-agent/bin/codedeploy-agent"
-            $CODEDEPLOY_BIN stop
-            yum erase codedeploy-agent -y
+            # ---
+            # Clean AMI of any previous agent caching information
+            if [ -n "$( ls -A /opt/codedeploy-agent/bin/codedeploy-agent )" ]; then "/opt/codedeploy-agent/bin/codedeploy-agent" stop; yum erase codedeploy-agent -y; fi
             # ---
             # Update Packages, inc. aws-cfn-bootstrap:
             yum update -y
-            yum install ruby -y
-            yum install wget -y
             # ---
+            # Install packages required by CodeDeploy Agent
+            yum install ruby -y
+            # --- Install CodeDeploy Agent
+            yum install wget -y
             cd /home/ec2-user
             wget https://aws-codedeploy-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/latest/install
             chmod +x ./install
@@ -153,6 +153,7 @@ Resources:
             # ---
             # All done so signal success
             /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackId} --resource PublicEC2Instance --region ${AWS::Region}
+
 
 # ==========================================
 # Outputs: {}

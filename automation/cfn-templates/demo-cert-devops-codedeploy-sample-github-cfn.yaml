@@ -32,6 +32,7 @@ Parameters:
   SshAccessKeyName:
     Description: "An Amazon EC2 regional key pair name"
     Type: AWS::EC2::KeyPair::KeyName
+    Default: "aws.dev.ec2.ssh.key.eu-central-1"
 
   # ------------------------------------------
   # --- IP CIDR for SSH Bastion Host
@@ -48,8 +49,11 @@ Parameters:
   # --- Latest Amazon_Linux_2 AMI
   LatestAmi:
     Description: "The AMI to use for EC2 instances"
-    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
-    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    Type: "AWS::EC2::Image::Id"
+    # SSM method below but this type of variable is not versatile within scripts
+    # Can not be called from a script without extra unknown authorizations:
+    #Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    #Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 
 # ==========================================
 Conditions: {}
@@ -74,7 +78,7 @@ Resources:
       Parameters:
         ProjectName:
           !Ref ProjectName
-      TimeoutInMinutes: 5
+      TimeoutInMinutes: 7
 
   # ------------------------------------------
   # --- VPC Definition
@@ -87,7 +91,7 @@ Resources:
       Parameters:
         ProjectName:
           !Ref ProjectName
-      TimeoutInMinutes: 5
+      TimeoutInMinutes: 7
 
   # ------------------------------------------
   # --- Public/Private Security Groups
@@ -104,7 +108,7 @@ Resources:
           !GetAtt VPCDef.Outputs.VPCID
         SshAccessCIDR:
           !Ref SshAccessCIDR
-      TimeoutInMinutes: 5
+      TimeoutInMinutes: 7
 
   # ------------------------------------------
   # --- EC2 Launch Template
@@ -125,7 +129,7 @@ Resources:
           !Ref SshAccessKeyName
         PublicEC2InstanceProfile: 
           !GetAtt IAMDef.Outputs.PublicEC2InstanceProfile
-      TimeoutInMinutes: 5
+      TimeoutInMinutes: 7
 
   # ------------------------------------------
   # --- Public EC2 Instance
@@ -152,7 +156,7 @@ Resources:
           !GetAtt IAMDef.Outputs.PublicEC2InstanceProfile
         PublicEC2LaunchTemplateId:
           !GetAtt PublicEC2LaunchTemplateDef.Outputs.PublicEC2LaunchTemplateId
-      TimeoutInMinutes: 10
+      TimeoutInMinutes: 15
 
 
 # ==========================================
