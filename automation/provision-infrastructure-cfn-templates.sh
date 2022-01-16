@@ -212,14 +212,21 @@ ${BUCKET_PREFIX}/${PROJECT_NAME}/cfn-templates/${PROJECT_NAME}-cfn.yaml"
 echo "Cloudformation Stack Creation Initiated .......: "
 echo "Cloudformation Stack Template URL .............: $TEMPLATE_URL"
 # ___
-STACK_ID=$(aws cloudformation create-stack --stack-name "$STACK_NAME" --parameters      \
-                ParameterKey=ProjectName,ParameterValue="$PROJECT_NAME"                 \
-                ParameterKey=SshAccessKeyName,ParameterValue="$EC2_SSH_KEY_NAME"        \
-                ParameterKey=SshAccessCIDR,ParameterValue="$SSH_ACCESS_CIDR"            \
-                ParameterKey=LatestAmi,ParameterValue="$AMI_LATEST" --output text       \
-                --tags Key=Name,Value="$PROJECT_NAME" --template-url "$TEMPLATE_URL"    \
-                --profile "$AWS_PROFILE" --region "$AWS_REGION" --on-failure DO_NOTHING \
-                --capabilities "CAPABILITY_NAMED_IAM" "CAPABILITY_AUTO_EXPAND" )
+STACK_ID=$(aws cloudformation create-stack \
+              --stack-name "$STACK_NAME" \
+              --template-url "$TEMPLATE_URL" \
+              --on-failure "DO_NOTHING" \
+              --capabilities "CAPABILITY_NAMED_IAM" "CAPABILITY_AUTO_EXPAND" \
+              --tags Key=Name,Value="$PROJECT_NAME" \
+              --region "$AWS_REGION" \
+              --profile "$AWS_PROFILE" \
+              --output text \
+              --parameters \
+                ParameterKey=ProjectName,ParameterValue="$PROJECT_NAME" \
+                ParameterKey=SshAccessKeyName,ParameterValue="$EC2_SSH_KEY_NAME" \
+                ParameterKey=SshAccessCIDR,ParameterValue="$SSH_ACCESS_CIDR"\
+                ParameterKey=LatestAmi,ParameterValue="$AMI_LATEST" \
+          )
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #----------------------------------------------
