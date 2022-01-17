@@ -1,64 +1,65 @@
 # demo-cert-devops-codedeploy-sample-github
 
-> The repository contains artifacts and reference material related to an AWS CodeDepoly deployment project and its auxiliary components. These components relate to a dual GitHub & AWS CodeCommit repository used to perform the sample AWS Tutorial: 'Use CodeDeploy to deploy an application from GitHub'. This exercise is in preparation for the AWS Certified DevOps Engineer Professional Exam."
-
+> The repository contains artifacts and reference material related to an AWS CodeDepoly deployment project and its auxiliary components. These components relate to a dual GitHub & AWS CodeCommit repository that is used to perform an AWS CodeDeploy infrastructure sampling.
 
 ---
 
-### Heading 1
+#### Overview
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+This repository contains artifacts and reference material related to an AWS CodeDeploy demonstration that deploys a sample application revision from a GitHub repository to a single Amazon EC2 instance running Amazon Linux 2. It elaborates on the following tutorial: [Use CodeDeploy to deploy an application from GitHub](https://docs.aws.amazon.com/codedeploy/latest/userguide/tutorials-github.html)
 
-### Heading 2 
+#### Integrating CodeDeploy with GitHub
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+CodeDeploy supports GitHub. AWS CodeDeploy can deploy application revisions stored in GitHub repositories for type EC2/On-Premises deployments only. The authorization process involves interacting with the AWS Console to give each application permission using OAuth.
 
-#### Note:
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+#### AWS CodeDeploy Agent
+
+For type EC2/On-Premises deployments, the AWS CodeDeploy service requires that an agent be installed on the target instance. For the simplicity of convenience, this demonstration manually installs the agent via the Userdata Script facility of the Launch Template CloudFormation nested stack. This agent could very well be be installed using AWS Systems Manager and is in fact the recommended method for installing and updating the CodeDeploy agent. There is a very handy AWS Systems Manager service integration available to you via the AWS Console the first time you manually create a Deployment Group.
+
+#### Infrastructure As Code
+
+A stand-alone solution records the complete infrastructure definition and takes the form of nested AWS CloudFormation templates. These are provisioned via a bash script that orchestrate the creation of all the Cloud resource components required in this demonstration and comprise the following:
+
+
+```bash
+
+automation/
+├── cfn-templates
+│   ├── demo-cert-devops-codedeploy-sample-github-cfn-dev-deploy.yaml.(DEPLOYMENT)
+│   ├── demo-cert-devops-codedeploy-sample-github-cfn-ec2-lt.yaml.....(LAUNCH TEMPLATE)
+│   ├── demo-cert-devops-codedeploy-sample-github-cfn-ec2-pub.yaml....(EC2 INSTANCE)
+│   ├── demo-cert-devops-codedeploy-sample-github-cfn-iam.yaml........(IAM ROLES)
+│   ├── demo-cert-devops-codedeploy-sample-github-cfn-vpc-sg.yaml.....(SECURITY GROUP)
+│   ├── demo-cert-devops-codedeploy-sample-github-cfn-vpc.yaml........(VPC)
+│   └── demo-cert-devops-codedeploy-sample-github-cfn.yaml............(TOP LEVEL)
+└── provision-infrastructure-cfn-templates.sh.........................(BASH SCRIPT)
+
+```
 
 --- 
 
 #### Reference:
 
-- Topic 1 - [Link Heading]()
 
-- Topic 2 - [Link Heading]()
+- AWS CodeDeploy - [GitHub integration with CodeDeploy](https://docs.aws.amazon.com/codedeploy/latest/userguide/integrations-partners-github.html).
+
+- AWS CodeDeploy - [Connect a CodeDeploy application to a GitHub repository](https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-create-cli-github.html)
+
+- GitHub - [Authorizing OAuth Apps](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/authorizing-oauth-apps)
+
+- AWS CodeDeploy - [Install the CodeDeploy agent using AWS Systems Manager](https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html)
+
+
 
 #### Relevant APIs:
 
-> ##### _AWS CodeBuild_
+> ##### _AWS CodeDeploy_
 
-> [create-project](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/codebuild/create-project.html)
+> [create-application](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/create-application.html)
 
-> [list-projects](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/codebuild/list-projects.html)
+> [create-deployment](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/create-deployment.html)
 
-> [batch-get-projects](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/codebuild/batch-get-projects.html)
-
-
-> ##### _Amazon ECR_
-
-> [create-repository](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ecr/create-repository.html)
-
-> [get-login-password](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ecr/get-login-password.html)
+> [get-deployment-instance](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/get-deployment-instance.html)
 
 
-
-Useful commands:
-
-aws s3 sync ./cfn-templates s3://demo-cert-devops/codedeploy/demo-cert-devops-codedeploy-sample-github/cfn-templates/
