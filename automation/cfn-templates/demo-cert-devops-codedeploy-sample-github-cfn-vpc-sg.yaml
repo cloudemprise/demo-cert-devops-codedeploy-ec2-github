@@ -99,7 +99,12 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: "10.0.0.0/16"
-        - Description: "httpd access for webserver"
+        - Description: "http access for webserver"
+          IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+        - Description: "https access for webserver"
           IpProtocol: "tcp"
           FromPort: 443
           ToPort: 443

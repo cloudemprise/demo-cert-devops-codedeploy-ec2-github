@@ -159,6 +159,26 @@ Resources:
       TimeoutInMinutes: 15
 
 
+  # ------------------------------------------
+  # --- CodeDeploy Deployment
+  CodeDeployDeploymentDef:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: "PublicEC2InstanceDef"
+    # .............................
+    Properties:
+      TemplateURL:
+        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-dev-deploy.yaml"
+      Parameters:
+        ProjectName:
+          !Ref ProjectName
+        ServiceRoleCodeDeployArn:
+          !GetAtt IAMDef.Outputs.ServiceRoleCodeDeployArn
+      TimeoutInMinutes: 7
+
+
+
+
+
 # ==========================================
 Outputs: {}
 # Outputs:

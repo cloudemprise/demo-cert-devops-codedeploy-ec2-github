@@ -211,3 +211,9 @@ Outputs:
   ServiceRoleCodeDeploy:
     Description: "CodeDeploy Service Role Name"
     Value: !Ref PolicyServiceRoleCodeDeploy
+
+  # ------------------------------------------
+  # --- CodeDeploy Service Role ARN
+  ServiceRoleCodeDeployArn:
+    Description: "CodeDeploy Service Role ARN"
+    Value: !GetAtt PolicyServiceRoleCodeDeploy.Arn
