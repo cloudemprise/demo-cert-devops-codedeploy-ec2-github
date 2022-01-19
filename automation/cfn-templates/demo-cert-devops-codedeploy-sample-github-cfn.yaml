@@ -31,19 +31,21 @@ Parameters:
   # --- SSH Key Pair Name
   SshAccessKeyName:
     Description: "An Amazon EC2 regional key pair name"
+    ConstraintDescription: "SshAccessKeyName is a required Field and can contain only ASCII characters."
     Type: AWS::EC2::KeyPair::KeyName
     Default: "aws.dev.ec2.ssh.key.eu-central-1"
+    AllowedPattern: '[\x20-\x7E]*'
 
   # ------------------------------------------
   # --- IP CIDR for SSH Bastion Host
   SshAccessCIDR:
-    Description: IP range for SSH access into Public Instance.
+    Description: "IP range for SSH access into Public Instance."
+    ConstraintDescription: "Must be a valid IPv4 CIDR."
     Type: String
     MinLength: "9"
     MaxLength: "18"
     Default: 0.0.0.0/0
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IPv4 CIDR.
 
   # ------------------------------------------
   # --- Latest Amazon_Linux_2 AMI

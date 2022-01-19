@@ -15,7 +15,11 @@ CodeDeploy supports GitHub. AWS CodeDeploy can deploy application revisions stor
 
 #### AWS CodeDeploy Agent
 
-For type EC2/On-Premises deployments, the AWS CodeDeploy service requires that an agent be installed on the target instance. For the simplicity of convenience, this demonstration manually installs the agent via the Userdata Script facility of the Launch Template CloudFormation nested stack. This agent could very well be be installed using AWS Systems Manager and is in fact the recommended method for installing and updating the CodeDeploy agent. There is a very handy AWS Systems Manager service integration available to you via the AWS Console the first time you manually create a Deployment Group.
+For type EC2/On-Premises deployments, the AWS CodeDeploy service requires that an agent be installed on the target instance. The CodeDeploy agent communicates outbound using HTTPS over port 443 and is not required for deployments that use the Amazon ECS or AWS Lambda compute platform. Log file can be found here: /var/log/aws/codedeploy-agent.
+
+For the simplicity of convenience, this demonstration manually installs the agent via the Userdata Script facility of the Launch Template CloudFormation nested stack.
+
+This agent could very well be be installed using AWS Systems Manager and is in fact the recommended method for installing and updating the CodeDeploy agent. There is a very handy AWS Systems Manager service integration that can set up installation and scheduled updates via the AWS Console when you manually create a Deployment Group. Don't forget to include the Managed Policy: AmazonSSMManagedInstanceCore within your service role.
 
 #### Infrastructure As Code
 
@@ -58,8 +62,16 @@ automation/
 
 > [create-application](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/create-application.html)
 
+> [create-deployment-group](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/create-deployment-group.html)
+
 > [create-deployment](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/create-deployment.html)
+
+> [create-deployment-config](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/create-deployment-config.html)
 
 > [get-deployment-instance](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/get-deployment-instance.html)
 
+> [get-deployment-config](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/get-deployment-config.html)
 
+--- 
+
+> [push](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/deploy/push.html)
