@@ -1,7 +1,8 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Discription Here:
+  An EC2 Instance is declared with an associated CreationPolicy attribute for OS
+  configuration activities within Userdata Script.
 
 # ------------------------------------------
 

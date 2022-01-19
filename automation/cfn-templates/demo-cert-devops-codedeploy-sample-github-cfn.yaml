@@ -1,8 +1,20 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Enter Description Here:
+  This template is the top level stack of a two-level hierarchical nested 
+  infrastructure declaration of cloudformation stacks.
 
+  Orchestration is controlled via a bash shell script included in the git 
+  project repository, i.e. automation/provision-infrastructure-cfn-templates.sh
+
+  Nested template components include:
+
+  Various IAM Role Authorizations.
+  A Virtual Private Cloud.
+  A Public Subnet Security Group definition.
+  A Public EC2 Instance declaration.
+  A EC2 Launch Template.
+  A CodeDeploy Deployment composition.
 # ------------------------------------------
 
 

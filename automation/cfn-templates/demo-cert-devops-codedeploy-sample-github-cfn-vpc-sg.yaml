@@ -4,13 +4,9 @@ Description: >
   Network Security Defense-In-Depth.
 
   A Restricted Public Subnet Security Group.
-  A Restricted Private Subnet Security Group.
 
   Public Ingress Rules limited to services on offer only. Public http ingress to
   facilitate network load balancer health checks.
-
-  Private Ingress Rules restricted to Public Security Group only, i.e. Bastion
-  Host must be used to access private subnets.
 
   Public egress is completely open while Private egress limited to Public
   Security Group.
