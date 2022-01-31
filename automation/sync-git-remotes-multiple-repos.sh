@@ -49,7 +49,7 @@ done
 
 #-----------------------------
 # Request Project Name
-PROJECT_NAME="demo-cert-devops-codedeploy-sample-github"
+PROJECT_NAME="demo-cert-devops-codedeploy-ec2-github"
 while true
 do
   # -e : stdin from terminal
@@ -74,9 +74,8 @@ done
 # Request ECR description
 REPO_DESCRIPTION=\
 "The repository contains artifacts and reference material related to an AWS CodeDepoly deployment \
-project and its auxiliary components. These components relate to a dual GitHub and AWS CodeCommit \
-repository used to perform the sample AWS Tutorial: 'Use CodeDeploy to deploy an application from \
-GitHub'. This exercise is in preparation for the AWS Certified DevOps Engineer Professional Exam."
+project and its auxiliary components. These components are used to perform a deployment of a \
+sample application to an EC2 Instance from GitHub."
 while true
 do
   # -e : stdin from terminal
