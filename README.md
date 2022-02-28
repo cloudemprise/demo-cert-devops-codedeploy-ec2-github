@@ -1,4 +1,4 @@
-# demo-cert-devops-codedeploy-sample-github
+# demo-cert-devops-codedeploy-ec2-github
 
 > The repository contains artifacts and reference material related to an AWS CodeDepoly deployment project and its auxiliary components. These components relate to a dual GitHub & AWS CodeCommit repository that is used to perform an AWS CodeDeploy infrastructure sampling.
 

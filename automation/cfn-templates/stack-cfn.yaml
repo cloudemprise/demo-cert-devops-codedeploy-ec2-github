@@ -33,11 +33,29 @@ Parameters:
     Description: "Name of this particular project"
     ConstraintDescription: "Specify name of this project"
     Type: String
-    Default: "demo-cert-devops-codedeploy-sample-github"
+    Default: "demo-cert-devops-ecs-fgt-alb"
+    AllowedPattern: (^[a-z0-9]([a-z0-9-]*(\.[a-z0-9])?)*$)
+
+  # ------------------------------------------
+  # --- Existing S3 Bucket Name
+  ProjectBucket:
+    Description: "S3 Bucket Location including prefixes."
+    ConstraintDescription: "Must be an existing S3 Bucket."
+    Type: String
+    Default: "demo-cert-devops"
     MinLength: 3
     MaxLength: 63
     AllowedPattern:
       (?!^(\d{1,3}\.){3}\d{1,3}$)(^[a-z0-9]([a-z0-9-]*(\.[a-z0-9])?)*$(?<!\-))
+
+  # ------------------------------------------
+  # --- S3 Bucket Folder Prefix
+  ProjectPrefix:
+    Description: "Project previx denoting primary aws service."
+    ConstraintDescription: "Must be S3 folder name compatible."
+    Type: String
+    Default: "ecs"
+    AllowedPattern: (^[a-z0-9]([a-z0-9/-]*(\.[a-z0-9])?)*$(?<!\-))
 
   # ------------------------------------------
   # --- SSH Key Pair Name
@@ -88,7 +106,7 @@ Resources:
     # .............................
     Properties:
       TemplateURL:
-        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-iam.yaml"
+        !Sub "https://${ProjectBucket}.s3.${AWS::Region}.amazonaws.com/${ProjectPrefix}/${ProjectName}/cfn-templates/${ProjectName}-cfn-iam.yaml"
       Parameters:
         ProjectName:
           !Ref ProjectName
@@ -101,7 +119,7 @@ Resources:
     # .............................
     Properties:
       TemplateURL:
-        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-vpc.yaml"
+        !Sub "https://${ProjectBucket}.s3.${AWS::Region}.amazonaws.com/${ProjectPrefix}/${ProjectName}/cfn-templates/${ProjectName}-cfn-vpc.yaml"
       Parameters:
         ProjectName:
           !Ref ProjectName
@@ -114,7 +132,7 @@ Resources:
     # .............................
     Properties:
       TemplateURL:
-        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-vpc-sg.yaml"
+        !Sub "https://${ProjectBucket}.s3.${AWS::Region}.amazonaws.com/${ProjectPrefix}/${ProjectName}/cfn-templates/${ProjectName}-cfn-vpc-sg.yaml"
       Parameters:
         ProjectName:
           !Ref ProjectName
@@ -131,7 +149,7 @@ Resources:
     # .............................
     Properties:
       TemplateURL:
-        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-ec2-lt.yaml"
+        !Sub "https://${ProjectBucket}.s3.${AWS::Region}.amazonaws.com/${ProjectPrefix}/${ProjectName}/cfn-templates/${ProjectName}-cfn-ec2-lt.yaml"
       Parameters:
         ProjectName:
           !Ref ProjectName
@@ -152,7 +170,7 @@ Resources:
     # .............................
     Properties:
       TemplateURL:
-        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-ec2-pub.yaml"
+        !Sub "https://${ProjectBucket}.s3.${AWS::Region}.amazonaws.com/${ProjectPrefix}/${ProjectName}/cfn-templates/${ProjectName}-cfn-ec2-pub.yaml"
       Parameters:
         ProjectName:
           !Ref ProjectName
@@ -181,7 +199,7 @@ Resources:
     # .............................
     Properties:
       TemplateURL:
-        !Sub "https://demo-cert-devops.s3.${AWS::Region}.amazonaws.com/codedeploy/${ProjectName}/cfn-templates/${ProjectName}-cfn-dev-deploy.yaml"
+        !Sub "https://${ProjectBucket}.s3.${AWS::Region}.amazonaws.com/${ProjectPrefix}/${ProjectName}/cfn-templates/${ProjectName}-cfn-dev-deploy.yaml"
       Parameters:
         ProjectName:
           !Ref ProjectName

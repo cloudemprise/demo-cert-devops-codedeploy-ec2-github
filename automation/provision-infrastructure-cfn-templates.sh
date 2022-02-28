@@ -72,6 +72,29 @@ done
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #-----------------------------
+# Request Project Name
+PROJECT_NAME="demo-cert-devops-codedeploy-ec2-github"
+while true
+do
+  # -e : stdin from terminal
+  # -r : backslash not an escape character
+  # -p : prompt on stderr
+  # -i : use default buffer val
+  read -er -i "$PROJECT_NAME" -p "Enter the Name of this Project ................: " USER_INPUT
+  REGEX='(^[a-z0-9]([a-z0-9-]*(\.[a-z0-9])?)*$)'
+  if [[ "${USER_INPUT:=$PROJECT_NAME}" =~ $REGEX ]]
+  then
+    echo "Project Name is valid .........................: $USER_INPUT"
+    PROJECT_NAME=$USER_INPUT
+    break
+  else
+    echo "Error! Project Name must be S3 Compatible .....: $USER_INPUT"
+  fi
+done
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+#-----------------------------
 # Request Bucket Name 
 PROJECT_BUCKET="demo-cert-devops"
 while true
@@ -81,9 +104,10 @@ do
   # -p : prompt on stderr
   # -i : use default buffer val
   read -er -i "$PROJECT_BUCKET" -p "Enter the Name of the Project Bucket ..........: " USER_INPUT
-  if [[ "${USER_INPUT:=$PROJECT_BUCKET}" =~ (^[a-z0-9]([a-z0-9-]*(\.[a-z0-9])?)*$) ]]
+  REGEX='(^[a-z0-9]([a-z0-9-]*(\.[a-z0-9])?)*$)'
+  if [[ "${USER_INPUT:=$PROJECT_BUCKET}" =~ $REGEX ]]
   then
-    echo "Bucket Name is valid ..........................: $USER_INPUT"
+    echo "Project Bucket Name is valid ..................: $USER_INPUT"
     PROJECT_BUCKET=$USER_INPUT
     break
   else
@@ -93,22 +117,23 @@ done
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #-----------------------------
-# Request Project Name
-PROJECT_NAME="demo-cert-devops-codedeploy-sample-github"
+# Request Bucket Prefix
+PROJECT_PREFIX="codedeploy"
 while true
 do
   # -e : stdin from terminal
   # -r : backslash not an escape character
   # -p : prompt on stderr
   # -i : use default buffer val
-  read -er -i "$PROJECT_NAME" -p "Enter the Name of this Project ................: " USER_INPUT
-  if [[ "${USER_INPUT:=$PROJECT_NAME}" =~ (^[a-z0-9]([a-z0-9-]*(\.[a-z0-9])?)*$) ]]
+  read -er -i "$PROJECT_PREFIX" -p "Enter the Name of the Project Bucket Prefix ...: " USER_INPUT
+  REGEX='(^[a-z0-9]([a-z0-9/-]*(\.[a-z0-9])?)*$)'
+  if [[ "${USER_INPUT:=$PROJECT_PREFIX}" =~ $REGEX ]]
   then
-    echo "Project Name is valid .........................: $USER_INPUT"
-    PROJECT_NAME=$USER_INPUT
+    echo "Bucket Prefix is valid ........................: $USER_INPUT"
+    PROJECT_PREFIX=$USER_INPUT
     break
   else
-    echo "Error! Project Name must be S3 Compatible .....: $USER_INPUT"
+    echo "Error! Bucket Prefix must be S3 Compatible ....: $USER_INPUT"
   fi
 done
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -175,10 +200,24 @@ echo "The latest AMI ................................: $AMI_LATEST"
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 #----------------------------------------------
-# Upload Cloudformation Template artifacts to S3
-BUCKET_PREFIX="codedeploy"
-PROJECT_LOCALE="${PROJECT_BUCKET}/${BUCKET_PREFIX}/${PROJECT_NAME}"
-find -L ./cfn-templates -type f -name "*.yaml" ! -path "*/scratch/*" -print0 |
+# Create cloudformation stack files from local templates
+find -L ./cfn-templates -type f -name "stack*.yaml" ! -path "*/scratch/*" -print0 |
+# -L : Follow symbolic links
+  while IFS= read -r -d '' FILE
+  do
+    if [[ ! -s "$FILE" ]]; then
+      echo "Invalid Cloudformation Template Document ......: $FILE"
+      exit 1
+    else
+      # Copy/Rename stack via parameter expansion
+      cp "$FILE" "${FILE//stack/$PROJECT_NAME}"
+    fi
+  done
+# ...
+# ---
+# Upload cloudformation stack file artifacts to S3
+PROJECT_LOCALE="${PROJECT_BUCKET}/${PROJECT_PREFIX}/${PROJECT_NAME}"
+find -L ./cfn-templates -type f -name "$PROJECT_NAME*.yaml" ! -path "*/scratch/*" -print0 |
 # -L : Follow symbolic links
   while IFS= read -r -d '' FILE
   do
@@ -186,7 +225,7 @@ find -L ./cfn-templates -type f -name "*.yaml" ! -path "*/scratch/*" -print0 |
       echo "Invalid Cloudformation Template Document ......: $FILE"
       exit 1
       # ...
-    elif (aws s3 cp "$FILE" "s3://$PROJECT_LOCALE${FILE#.}" --profile "$AWS_PROFILE" \
+    elif (aws s3 mv "$FILE" "s3://$PROJECT_LOCALE${FILE#.}" --profile "$AWS_PROFILE" \
           --region "$AWS_REGION" > /dev/null)
     then
       echo "Uploading Cloudformation Template to S3 .......: s3://$PROJECT_LOCALE${FILE#.}"
@@ -207,7 +246,7 @@ find -L ./cfn-templates -type f -name "*.yaml" ! -path "*/scratch/*" -print0 |
 
 # ___
 TEMPLATE_URL="https://${PROJECT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/\
-${BUCKET_PREFIX}/${PROJECT_NAME}/cfn-templates/${PROJECT_NAME}-cfn.yaml"
+${PROJECT_PREFIX}/${PROJECT_NAME}/cfn-templates/${PROJECT_NAME}-cfn.yaml"
 # ___
 echo "Cloudformation Stack Creation Initiated .......: "
 echo "Cloudformation Stack Template URL .............: $TEMPLATE_URL"
@@ -223,6 +262,8 @@ STACK_ID=$(aws cloudformation create-stack \
               --output text \
               --parameters \
                 ParameterKey=ProjectName,ParameterValue="$PROJECT_NAME" \
+                ParameterKey=ProjectBucket,ParameterValue="$PROJECT_BUCKET" \
+                ParameterKey=ProjectPrefix,ParameterValue="$PROJECT_PREFIX" \
                 ParameterKey=SshAccessKeyName,ParameterValue="$EC2_SSH_KEY_NAME" \
                 ParameterKey=SshAccessCIDR,ParameterValue="$SSH_ACCESS_CIDR"\
                 ParameterKey=LatestAmi,ParameterValue="$AMI_LATEST" \
