@@ -94,7 +94,7 @@ Resources:
           RevisionType: GitHub
           GitHubLocation:
             Repository: !Sub "cloudemprise/${ProjectName}"
-            CommitId: "ed0d33204941d0a2e002048821ad94bc1183d840"
+            CommitId: "a2cabdf6d7d3711491ed23c8462848ed37cc1649"
       # .............................
       Ec2TagFilters:
         - 
